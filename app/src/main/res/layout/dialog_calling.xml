@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?><!--<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/activity_calling"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">-->
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clickable="true">
+
+    <ImageView
+        android:id="@+id/image_1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@android:drawable/ic_menu_search" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="100dp"
+        android:gravity="center"
+        android:text="click to show"
+        android:textColor="@android:color/white"
+        android:textSize="18sp" />
+
+    <com.nightonke.blurlockview.BlurLockView
+        android:id="@+id/blurlockview1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</FrameLayout><!--  <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_below="@+id/tv_caller"
+          android:layout_marginTop="40dp"
+          android:gravity="center"
+          android:orientation="vertical">
+
+
+          <EditText
+              android:id="@+id/et_master_password"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:background="@android:color/white"
+              android:gravity="center_horizontal"
+              android:hint="Master Password"
+              android:padding="10dp"
+              android:inputType="textPassword"
+              android:textSize="20sp"
+              android:textStyle="bold" />
+
+          &lt;!&ndash;android:layout_marginRight="70dp"&ndash;&gt;
+
+          <Button
+              android:id="@+id/btn_enter"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:gravity="center_horizontal"
+              android:text="Enter" />
+      </LinearLayout>
+
+      <TextView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_above="@+id/tv_caller"
+          android:layout_marginTop="30dp"
+          android:gravity="center"
+          android:text="You have no rights to use other apps"
+          android:textSize="20sp"
+          android:textStyle="bold" />
+
+      <TextView
+          android:id="@+id/tv_caller"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_centerVertical="true"
+          android:layout_marginTop="15dp"
+          android:ellipsize="marquee"
+          android:gravity="center"
+          android:maxLines="2"
+          android:text="Thank you"
+          android:textColor="@android:color/white"
+          android:textSize="35sp"
+          android:textStyle="bold" />--><!--
+
+</RelativeLayout>-->
