@@ -11,10 +11,10 @@ import java.util.Arrays;
 import java.util.List;
 
 
-public class SharedPreference {
+public class LockPreference {
     public static final String LOCKED_APP = "locked_app";
 
-    public SharedPreference() {
+    public LockPreference() {
         super();
     }
 

@@ -1,6 +1,5 @@
 package io.dalwadi2.applockdemo.services;
 
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.app.Service;
@@ -23,17 +22,17 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.nightonke.blurlockview.BlurLockView;
-import com.nightonke.blurlockview.Password;
-
 import java.util.List;
 import java.util.SortedMap;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
 
+import io.dalwadi2.applockdemo.LockPreference;
 import io.dalwadi2.applockdemo.R;
-import io.dalwadi2.applockdemo.SharedPreference;
+import io.dalwadi2.applockdemo.services.pin.IndicatorDots;
+import io.dalwadi2.applockdemo.services.pin.PinLockListener;
+import io.dalwadi2.applockdemo.services.pin.PinLockView;
 
 
 /**
@@ -42,23 +41,52 @@ import io.dalwadi2.applockdemo.SharedPreference;
 public class AppCheckServices extends Service {
 
     public static final String TAG = "AppCheckServices";
-    private Context context = null;
-    private Timer timer;
-    ImageView imageView;
-    private WindowManager windowManager;
-    private Dialog dialog;
     public static String currentApp = "";
     public static String previousApp = "";
-    SharedPreference sharedPreference;
+    ImageView imageView;
+    LockPreference lockPreference;
     List<String> pakageName;
+    private Context context = null;
+    private Timer timer;
+    private WindowManager windowManager;
+    private Dialog dialog;
+    private TimerTask updateTask = new TimerTask() {
+        @Override
+        public void run() {
+            if (lockPreference != null) {
+                pakageName = lockPreference.getLocked(context);
+            }
+            if (isConcernedAppIsInForeground()) {
+                Log.e(TAG, "run: ");
+                if (imageView != null) {
+                    imageView.post(new Runnable() {
+                        public void run() {
+                            if (!currentApp.matches(previousApp)) {
+                                showUnlockDialog();
+                                previousApp = currentApp;
+                            }
+                        }
+                    });
+                }
+            } else {
+                if (imageView != null) {
+                    imageView.post(new Runnable() {
+                        public void run() {
+                            hideUnlockDialog();
+                        }
+                    });
+                }
+            }
+        }
+    };
 
     @Override
     public void onCreate() {
         super.onCreate();
         context = getApplicationContext();
-        sharedPreference = new SharedPreference();
-        if (sharedPreference != null) {
-            pakageName = sharedPreference.getLocked(context);
+        lockPreference = new LockPreference();
+        if (lockPreference != null) {
+            pakageName = lockPreference.getLocked(context);
         }
         timer = new Timer("AppCheckServices");
         timer.schedule(updateTask, 1000L, 1000L);
@@ -85,36 +113,6 @@ public class AppCheckServices extends Service {
 
     }
 
-    private TimerTask updateTask = new TimerTask() {
-        @Override
-        public void run() {
-            if (sharedPreference != null) {
-                pakageName = sharedPreference.getLocked(context);
-            }
-            if (isConcernedAppIsInForeground()) {
-                Log.e(TAG, "run: ");
-                if (imageView != null) {
-                    imageView.post(new Runnable() {
-                        public void run() {
-                            if (!currentApp.matches(previousApp)) {
-                                showUnlockDialog();
-                                previousApp = currentApp;
-                            }
-                        }
-                    });
-                }
-            } else {
-                if (imageView != null) {
-                    imageView.post(new Runnable() {
-                        public void run() {
-                            hideUnlockDialog();
-                        }
-                    });
-                }
-            }
-        }
-    };
-
     void showUnlockDialog() {
         showDialog();
     }
@@ -140,7 +138,7 @@ public class AppCheckServices extends Service {
         LayoutInflater layoutInflater = LayoutInflater.from(context);
         View promptsView = layoutInflater.inflate(R.layout.dialog_calling, null);
 
-        dialog = new Dialog((Activity) getApplicationContext(), android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+        dialog = new Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
         dialog.setCanceledOnTouchOutside(false);
         dialog.setCancelable(false);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -148,7 +146,26 @@ public class AppCheckServices extends Service {
         dialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT);
         dialog.setContentView(promptsView);
         dialog.getWindow().setGravity(Gravity.CENTER);
+        final PinLockView mPinLockView;
+        IndicatorDots mIndicatorDots;
+        mPinLockView = (PinLockView) dialog.findViewById(R.id.pin_lock_view);
+        mIndicatorDots = (IndicatorDots) dialog.findViewById(R.id.indicator_dots);
+        mPinLockView.attachIndicatorDots(mIndicatorDots);
+        mPinLockView.setPinLockListener(new PinLockListener() {
+            @Override
+            public void onComplete(String pin) {
+                Log.e(TAG, "onComplete: " + pin);
+                if (pin.equals("111111")) {
+                    dialog.dismiss();
+                } else {
+                    Toast.makeText(context, "Incorrect Pin", Toast.LENGTH_SHORT).show();
+                    mPinLockView.resetPinLockView();
+                }
+            }
+        });
 
+        mPinLockView.setPinLength(6);
+//        mPinLockView.setTextColor(getResources().getColor(R.color.white));
        /* final EditText editText = (EditText) dialog.findViewById(R.id.et_master_password);
         Button btn = (Button) dialog.findViewById(R.id.btn_enter);
 
@@ -162,48 +179,6 @@ public class AppCheckServices extends Service {
             }
         });*/
 
-        ImageView imageView1;
-        BlurLockView blurLockView;
-        imageView1 = (ImageView) dialog.findViewById(R.id.image_1);
-
-        blurLockView = (BlurLockView) dialog.findViewById(R.id.blurlockview1);
-
-        // Set the view that need to be blurred
-        blurLockView.setBlurredView(imageView1);
-
-        // Set the password
-        blurLockView.setCorrectPassword("1111");
-
-        blurLockView.setTitle("TITLE");
-        blurLockView.setLeftButton("LEFT_BUTTON");
-        blurLockView.setRightButton("RIGHT_BUTTON");
-//        blurLockView.setTypeface(getTypeface());
-        blurLockView.setType(Password.NUMBER, false);
-
-        blurLockView.setOnLeftButtonClickListener(new BlurLockView.OnLeftButtonClickListener() {
-            @Override
-            public void onClick() {
-                Toast.makeText(context, "left button", Toast.LENGTH_SHORT).show();
-            }
-        });
-        blurLockView.setOnPasswordInputListener(new BlurLockView.OnPasswordInputListener() {
-            @Override
-            public void correct(String inputPassword) {
-                dialog.dismiss();
-            }
-
-            @Override
-            public void incorrect(String inputPassword) {
-                Toast.makeText(context, "incorect", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void input(String inputPassword) {
-                Toast.makeText(context, "     " + inputPassword, Toast.LENGTH_SHORT).show();
-            }
-        });
-
-//        imageView1.setOnClickListener(this);
         dialog.setOnKeyListener(new Dialog.OnKeyListener() {
             @Override
             public boolean onKey(DialogInterface dialog, int keyCode,
@@ -220,11 +195,6 @@ public class AppCheckServices extends Service {
         });
 
         dialog.show();
-
-
-//        Intent intent = new Intent(context, ShowActivity.class);
-//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//        startActivity(intent);
     }
 
     @Override

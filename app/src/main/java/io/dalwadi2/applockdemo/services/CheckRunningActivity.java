@@ -9,18 +9,18 @@ import android.util.Log;
 
 import java.util.List;
 
-import io.dalwadi2.applockdemo.SharedPreference;
+import io.dalwadi2.applockdemo.LockPreference;
 
 public class CheckRunningActivity extends Thread {
+    private static final String TAG = "CheckRunningActivity";
     ActivityManager am = null;
     Context context = null;
-    private static final String TAG = "CheckRunningActivity";
-    SharedPreference sharedPreference;
+    LockPreference lockPreference;
 
     public CheckRunningActivity(Context con) {
         context = con;
         am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        sharedPreference = new SharedPreference();
+        lockPreference = new LockPreference();
 
 //        List<PackageInfo> packList = getPackageManager().getInstalledPackages(0);
 //        for (int i = 0; i < packList.size(); i++) {
@@ -60,7 +60,7 @@ public class CheckRunningActivity extends Thread {
             if ((packageInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
 
                 if (packageInfo.packageName != context.getPackageName()) {
-                    sharedPreference.addLocked(context, packageInfo.packageName);
+                    lockPreference.addLocked(context, packageInfo.packageName);
 
                     Log.e("test", "Installed package :" + packageInfo.packageName);
                     Log.e("test", "Source dir : " + packageInfo.sourceDir);

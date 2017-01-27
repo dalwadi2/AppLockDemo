@@ -7,16 +7,16 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.widget.Toast;
 
-import io.dalwadi2.applockdemo.SharedPreference;
+import io.dalwadi2.applockdemo.LockPreference;
 
 public class NewAppInstalledReceiver extends BroadcastReceiver {
 
-    SharedPreference sharedPreference;
+    LockPreference lockPreference;
 
     @Override
     public void onReceive(Context context, Intent intent) {
         context.startService(new Intent(context, AppCheckServices.class));
-        sharedPreference = new SharedPreference();
+        lockPreference = new LockPreference();
 
         if (!intent.getAction().equals(Intent.ACTION_PACKAGE_REPLACED) && intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
             return;
@@ -25,8 +25,8 @@ public class NewAppInstalledReceiver extends BroadcastReceiver {
         if (intent.getAction().equals("android.intent.action.PACKAGE_ADDED")) {
             String[] a = intent.getDataString().split(":");
             String packageName = a[a.length - 1];
-            if (sharedPreference != null) {
-                if (!sharedPreference.getPassword(context).isEmpty()) {
+            if (lockPreference != null) {
+                if (!lockPreference.getPassword(context).isEmpty()) {
                     showDialogToAskForNewAppInstalled(context, appName(context, packageName), packageName);
                 }
             }
@@ -35,7 +35,7 @@ public class NewAppInstalledReceiver extends BroadcastReceiver {
         if (intent.getAction().equals("android.intent.action.PACKAGE_REMOVED")) {
             String[] a = intent.getDataString().split(":");
             String packageName = a[a.length - 1];
-            sharedPreference.removeLocked(context, packageName);
+            lockPreference.removeLocked(context, packageName);
         }
     }
 
@@ -52,7 +52,7 @@ public class NewAppInstalledReceiver extends BroadcastReceiver {
     }
 
     public void showDialogToAskForNewAppInstalled(final Context context, String appName, final String packageName) {
-        sharedPreference.addLocked(context, packageName);
+        lockPreference.addLocked(context, packageName);
         Toast.makeText(context, appName + " locked by Administrator.", Toast.LENGTH_SHORT).show();
     }
 
